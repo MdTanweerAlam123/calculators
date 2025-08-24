@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTA ChemLab – Smart Chemistry Calculations (Keeps your initials)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 15px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .reaction-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .reaction-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .reaction-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .reaction-equation {
+            font-size: 1.4rem;
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        
+        .reaction-details {
+            display: none;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .detail-content {
+            padding: 10px;
+            background-color: white;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        
+        .math-equation {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            padding: 5px 0;
+        }
+        
+        sub, sup {
+            font-size: 0.8em;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2e59d9;
+        }
+        
+        .btn-download {
+            background-color: #1cc88a;
+        }
+        
+        .btn-download:hover {
+            background-color: #17a673;
+        }
+        
+        .btn-library {
+            background-color: #f6c23e;
+        }
+        
+        .btn-library:hover {
+            background-color: #dda20a;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .library-navigation {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .library-info {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+            color: #5a5c69;
+        }
+        
+        .chevron {
+            transition: transform 0.3s;
+        }
+        
+        .expanded .chevron {
+            transform: rotate(180deg);
+        }
+        
+        @media (max-width: 600px) {
+            .reaction-equation {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .library-navigation {
+                flex-direction: column;
+            }
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MTA ChemLab – Smart Chemistry Calculations (Keeps your initials)</h1>
+            <p class="subtitle">Explore chemical reactions with detailed calculations</p>
+        </header>
+        
+        <div class="reaction-card">
+            <div class="reaction-title" onclick="toggleDetails('reaction1')">
+                <h2>Ammonia Synthesis</h2>
+                <span class="chevron">▼</span>
+            </div>
+            
+            <div class="reaction-equation">
+                N<sub>2</sub> + 3H<sub>2</sub> → 2NH<sub>3</sub>, ΔH = -91.4 kJ/mol
+            </div>
+            
+            <div id="reaction1" class="reaction-details">
+                <div class="detail-item">
+                    <div class="detail-title">Balanced Chemical Equation</div>
+                    <div class="detail-content math-equation">
+                        N<sub>2</sub> + 3H<sub>2</sub> → 2NH<sub>3</sub>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-title">Enthalpy Change (ΔH)</div>
+                    <div class="detail-content math-equation">
+                        ΔH = -91.4 kJ/mol (Exothermic reaction)
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-title">Stoichiometry</div>
+                    <div class="detail-content math-equation">
+                        1 mol N<sub>2</sub> + 3 mol H<sub>2</sub> → 2 mol NH<sub>3</sub><br>
+                        Mass: 28g N<sub>2</sub> + 6g H<sub>2</sub> → 34g NH<sub>3</sub>
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-title">Work Calculation</div>
+                    <div class="detail-content math-equation">
+                        W = -PΔV<br>
+                        Since volume decreases (ΔV &lt; 0), work is positive (W &gt; 0)<br>
+                        Work is done on the system
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-title">Entropy Change (ΔS)</div>
+                    <div class="detail-content math-equation">
+                        ΔS &lt; 0 (Negative)<br>
+                        Volume decreases, so disorder decreases
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-title">Gibbs Free Energy (ΔG)</div>
+                    <div class="detail-content math-equation">
+                        ΔG = ΔH - TΔS<br>
+                        Since ΔH &lt; 0 and ΔS &lt; 0, the reaction is spontaneous at low temperatures
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="reaction-card">
+            <div class="reaction-title" onclick="toggleDetails('reaction2')">
+                <h2>Equilibrium Constants</h2>
+                <span class="chevron">▼</span>
+            </div>
+            
+            <div class="reaction-equation">
+                K<sub>p</sub> = K<sub>c</sub>(RT)<sup>Δn</sup>
+            </div>
+            
+            <div id="reaction2" class="reaction-details">
+                <div class="detail-item">
+                    <div class="detail-title">Relationship between K<sub>p</sub> and K<sub>c</sub></div>
+                    <div class="detail-content math-equation">
+                        K<sub>p</sub> = K<sub>c</sub>(RT)<sup>Δn</sup><br>
+                        Where Δn = (moles of products) - (moles of reactants)
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-title">For Ammonia Synthesis</div>
+                    <div class="detail-content math-equation">
+                        N<sub>2</sub> + 3H<sub>2</sub> ⇌ 2NH<sub>3</sub><br>
+                        Δn = 2 - 4 = -2<br>
+                        K<sub>p</sub> = K<sub>c</sub>(RT)<sup>-2</sup> = K<sub>c</sub>/(RT)<sup>2</sup><br>
+                        Therefore, K<sub>p</sub> &lt; K<sub>c</sub>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- New Reaction Library Card -->
+        <div class="reaction-card">
+            <div class="reaction-title" onclick="toggleDetails('reactionLibrary')">
+                <h2>Chemical Reaction Library</h2>
+                <span class="chevron">▼</span>
+            </div>
+            
+            <div id="reactionLibrary" class="reaction-details">
+                <div class="library-info">
+                    Reaction <span id="currentReaction">1</span> of <span id="totalReactions">15</span>
+                </div>
+                
+                <div class="reaction-equation" id="libraryEquation">
+                    N<sub>2</sub>(g) + 3H<sub>2</sub>(g) ⇌ 2NH<sub>3</sub>(g)<br>
+                    ΔH = -92.4 kJ/mol (exothermic)
+                </div>
+                
+                <div class="library-navigation">
+                    <button class="btn btn-library" onclick="prevReaction()">Previous</button>
+                    <button class="btn btn-library" onclick="nextReaction()">Next</button>
+                    <button class="btn btn-library" onclick="calculateCurrentReaction()">Calculate</button>
+                </div>
+                
+                <div id="libraryCalculationResult"></div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn" onclick="expandAll()">Expand All Details</button>
+            <button class="btn" onclick="collapseAll()">Collapse All</button>
+            <button class="btn btn-download" onclick="exportToPDF()">Download as PDF</button>
+            <button class="btn btn-download" onclick="exportToWord()">Export to Word</button>
+        </div>
+        
+        <div class="footer">
+            <p>Chemistry Calculator App • All calculations maintain proper chemical notation</p>
+        </div>
+    </div>
+
+    <script>
+        // Reaction library data
+        const reactions = [
+            {
+                equation: "N<sub>2</sub>(g) + 3H<sub>2</sub>(g) ⇌ 2NH<sub>3</sub>(g)",
+                enthalpy: "ΔH = -92.4 kJ/mol (exothermic)",
+                type: "exothermic",
+                details: "Ammonia synthesis (Haber process)"
+            },
+            {
+                equation: "N<sub>2</sub>O<sub>4</sub>(g) ⇌ 2NO<sub>2</sub>(g)",
+                enthalpy: "ΔH = +57.2 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Dinitrogen tetroxide dissociation"
+            },
+            {
+                equation: "2SO<sub>2</sub>(g) + O<sub>2</sub>(g) ⇌ 2SO<sub>3</sub>(g)",
+                enthalpy: "ΔH = -198.4 kJ/mol (exothermic)",
+                type: "exothermic",
+                details: "Sulfur trioxide formation"
+            },
+            {
+                equation: "2I<sub>2</sub>O<sub>5</sub>(s) ⇌ 4I<sub>2</sub>(g) + 5O<sub>2</sub>(g)",
+                enthalpy: "ΔH = +430 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Iodine pentoxide decomposition"
+            },
+            {
+                equation: "CaCO<sub>3</sub>(s) ⇌ CaO(s) + CO<sub>2</sub>(g)",
+                enthalpy: "ΔH = +178 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Calcium carbonate decomposition"
+            },
+            {
+                equation: "2KClO<sub>3</sub>(s) ⇌ 2KCl(s) + 3O<sub>2</sub>(g)",
+                enthalpy: "ΔH = +89.4 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Potassium chlorate decomposition"
+            },
+            {
+                equation: "NH<sub>4</sub>Cl(s) ⇌ NH<sub>3</sub>(g) + HCl(g)",
+                enthalpy: "ΔH = +176 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Ammonium chloride sublimation"
+            },
+            {
+                equation: "C(s) + H<sub>2</sub>O(g) ⇌ CO(g) + H<sub>2</sub>(g)",
+                enthalpy: "ΔH = +131 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Water-gas reaction"
+            },
+            {
+                equation: "C(s) + CO<sub>2</sub>(g) ⇌ 2CO(g)",
+                enthalpy: "ΔH = +172.5 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Boudouard reaction"
+            },
+            {
+                equation: "Fe<sub>2</sub>O<sub>3</sub>(s) + 3CO(g) ⇌ 2Fe(s) + 3CO<sub>2</sub>(g)",
+                enthalpy: "ΔH = -23 kJ/mol (exothermic)",
+                type: "exothermic",
+                details: "Iron ore reduction"
+            },
+            {
+                equation: "CaO(s) + CO<sub>2</sub>(g) ⇌ CaCO<sub>3</sub>(s)",
+                enthalpy: "ΔH = -178 kJ/mol (exothermic)",
+                type: "exothermic",
+                details: "Carbonation of lime"
+            },
+            {
+                equation: "4NH<sub>3</sub>(g) + 5O<sub>2</sub>(g) ⇌ 4NO(g) + 6H<sub>2</sub>O(g)",
+                enthalpy: "ΔH = -905 kJ/mol (exothermic)",
+                type: "exothermic",
+                details: "Ammonia oxidation (Ostwald process)"
+            },
+            {
+                equation: "2NO<sub>2</sub>(g) ⇌ N<sub>2</sub>O<sub>4</sub>(g)",
+                enthalpy: "ΔH = -57.2 kJ/mol (exothermic)",
+                type: "exothermic",
+                details: "Nitrogen dioxide dimerization"
+            },
+            {
+                equation: "2H<sub>2</sub>O(g) + O<sub>2</sub>(g) ⇌ 2H<sub>2</sub>O<sub>2</sub>(g)",
+                enthalpy: "ΔH = +196 kJ/mol (endothermic)",
+                type: "endothermic",
+                details: "Hydrogen peroxide formation"
+            },
+            {
+                equation: "2CO(g) + O<sub>2</sub>(g) ⇌ 2CO<sub>2</sub>(g)",
+                enthalpy: "ΔH = -566 kJ/mol (exothermic)",
+                type: "exothermic",
+                details: "Carbon monoxide combustion"
+            }
+        ];
+
+        let currentReactionIndex = 0;
+        const totalReactions = reactions.length;
+
+        // Initialize the library display
+        document.getElementById('totalReactions').textContent = totalReactions;
+        updateReactionDisplay();
+
+        function updateReactionDisplay() {
+            const reaction = reactions[currentReactionIndex];
+            document.getElementById('libraryEquation').innerHTML = reaction.equation + "<br>" + reaction.enthalpy;
+            document.getElementById('currentReaction').textContent = currentReactionIndex + 1;
+        }
+
+        function nextReaction() {
+            currentReactionIndex = (currentReactionIndex + 1) % totalReactions;
+            updateReactionDisplay();
+            // Clear previous calculation
+            document.getElementById('libraryCalculationResult').innerHTML = '';
+        }
+
+        function prevReaction() {
+            currentReactionIndex = (currentReactionIndex - 1 + totalReactions) % totalReactions;
+            updateReactionDisplay();
+            // Clear previous calculation
+            document.getElementById('libraryCalculationResult').innerHTML = '';
+        }
+
+        function calculateCurrentReaction() {
+            const reaction = reactions[currentReactionIndex];
+            const resultDiv = document.getElementById('libraryCalculationResult');
+            
+            // Generate calculation based on reaction type
+            let calculationHTML = `
+                <div class="detail-item">
+                    <div class="detail-title">Reaction Details</div>
+                    <div class="detail-content math-equation">
+                        ${reaction.details}
+                    </div>
+                </div>
+                
+                <div class="detail-item">
+                    <div class="detail-title">Enthalpy Change (ΔH)</div>
+                    <div class="detail-content math-equation">
+                        ${reaction.enthalpy}
+                    </div>
+                </div>
+            `;
+            
+            if (reaction.type === "exothermic") {
+                calculationHTML += `
+                    <div class="detail-item">
+                        <div class="detail-title">Energy Release</div>
+                        <div class="detail-content math-equation">
+                            This reaction releases energy as heat to the surroundings.<br>
+                            The negative ΔH value indicates an exothermic process.
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-title">Equilibrium Considerations</div>
+                        <div class="detail-content math-equation">
+                            For exothermic reactions, increasing temperature shifts equilibrium to the left (Le Chatelier's Principle).<br>
+                            Lower temperatures favor product formation for exothermic reactions.
+                        </div>
+                    </div>
+                `;
+            } else {
+                calculationHTML += `
+                    <div class="detail-item">
+                        <div class="detail-title">Energy Absorption</div>
+                        <div class="detail-content math-equation">
+                            This reaction absorbs energy from the surroundings.<br>
+                            The positive ΔH value indicates an endothermic process.
+                        </div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-title">Equilibrium Considerations</div>
+                        <div class="detail-content math-equation">
+                            For endothermic reactions, increasing temperature shifts equilibrium to the right (Le Chatelier's Principle).<br>
+                            Higher temperatures favor product formation for endothermic reactions.
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Check if the reaction involves gases for Kp/Kc calculations
+            if (reaction.equation.includes("(g)")) {
+                calculationHTML += `
+                    <div class="detail-item">
+                        <div class="detail-title">Equilibrium Constants</div>
+                        <div class="detail-content math-equation">
+                            For gaseous reactions: K<sub>p</sub> = K<sub>c</sub>(RT)<sup>Δn</sup><br>
+                            Where Δn = (moles of gaseous products) - (moles of gaseous reactants)
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultDiv.innerHTML = calculationHTML;
+        }
+
+        // Existing functions
+        function toggleDetails(id) {
+            const details = document.getElementById(id);
+            const title = details.previousElementSibling.previousElementSibling;
+            
+            if (details.style.display === 'block') {
+                details.style.display = 'none';
+                title.classList.remove('expanded');
+            } else {
+                details.style.display = 'block';
+                title.classList.add('expanded');
+            }
+        }
+        
+        function expandAll() {
+            const allDetails = document.querySelectorAll('.reaction-details');
+            const allTitles = document.querySelectorAll('.reaction-title');
+            
+            allDetails.forEach(detail => {
+                detail.style.display = 'block';
+            });
+            
+            allTitles.forEach(title => {
+                title.classList.add('expanded');
+            });
+        }
+        
+        function collapseAll() {
+            const allDetails = document.querySelectorAll('.reaction-details');
+            const allTitles = document.querySelectorAll('.reaction-title');
+            
+            allDetails.forEach(detail => {
+                detail.style.display = 'none';
+            });
+            
+            allTitles.forEach(title => {
+                title.classList.remove('expanded');
+            });
+        }
+        
+        function exportToPDF() {
+            const element = document.querySelector('.container');
+            
+            // Clone the element to avoid modifying the original
+            const clonedElement = element.cloneNode(true);
+            
+            // Expand all details in the clone for printing
+            const allDetails = clonedElement.querySelectorAll('.reaction-details');
+            allDetails.forEach(detail => {
+                detail.style.display = 'block';
+            });
+            
+            // Set options for PDF generation
+            const options = {
+                margin: 10,
+                filename: 'chemistry-calculations.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            // Generate PDF
+            html2pdf().from(clonedElement).set(options).save();
+        }
+        
+        function exportToWord() {
+            // Get the HTML content
+            const content = document.querySelector('.container').innerHTML;
+            
+            // Create a Blob with HTML content
+            const blob = new Blob([`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        .math-equation { font-family: 'Times New Roman', serif; }
+                        sub, sup { font-size: 0.8em; }
+                        .detail-item { margin-bottom: 15px; }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `], { type: 'application/msword' });
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'chemistry-calculations.doc';
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Initialize the app with first reaction expanded
+        window.onload = function() {
+            toggleDetails('reaction1');
+        };
+    </script>
+</body>
+</html>
